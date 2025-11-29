@@ -1,4 +1,9 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+ package="com.example.sms_rag">
+<!-- Permission to read existing SMS messages -->
+    <uses-permission android:name="android.permission.READ_SMS" />
+    <!-- Optional: receive SMS broadcasts (only if you also want future incoming messages) -->
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <application
         android:label="sms_rag"
         android:name="${applicationName}"
