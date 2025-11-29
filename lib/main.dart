@@ -106,32 +106,41 @@ class _SmsRagHomePageState extends State<SmsRagHomePage> {
 
       // Load SMS messages
       setState(() => _statusText = 'Loading SMS messages...');
-      _smsMessages = await _smsReader.getAllSms();
+      final allMessages = await _smsReader.getAllSms();
 
-      if (_smsMessages.isEmpty) {
+      if (allMessages.isEmpty) {
         setState(() => _statusText = 'No SMS messages found');
         return;
       }
 
+      // Store all messages for display
+      _smsMessages = allMessages;
+
+      // Only index first 50 messages for embeddings
+      final messagesToIndex = allMessages.take(50).toList();
+
       // Convert to RAG documents and store
       setState(
-        () => _statusText = 'Indexing ${_smsMessages.length} messages...',
+        () => _statusText =
+            'Indexing ${messagesToIndex.length} messages (of ${allMessages.length} total)...',
       );
-      final smsDocuments = _smsMessages
+      final smsDocuments = messagesToIndex
           .map((msg) => msg.toRagDocument())
           .toList();
 
       await _ragService.storeSmsDocuments(smsDocuments: smsDocuments);
 
       setState(() {
-        _documentsStored = _smsMessages.length;
+        _documentsStored = messagesToIndex.length;
         _statusText =
-            'Indexed ${_smsMessages.length} SMS messages. Ask a question!';
+            'Indexed ${messagesToIndex.length} of ${allMessages.length} SMS messages. Ask a question!';
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('✅ Indexed ${_smsMessages.length} SMS messages'),
+          content: Text(
+            '✅ Indexed ${messagesToIndex.length} of ${allMessages.length} SMS messages',
+          ),
         ),
       );
     } catch (e) {
